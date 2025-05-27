@@ -18,6 +18,8 @@ const AIWritingAssistant = ({
     }
 
     setLoading(true);
+    setSuggestions(null);
+
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/ai/analyze`,
@@ -39,15 +41,40 @@ const AIWritingAssistant = ({
   };
 
   const applySuggestion = (suggestion) => {
-    onContentUpdate(suggestion.improvedText);
-    setSuggestions(null);
+    if (suggestion.original && suggestion.improved) {
+      // Replace specific text
+      const updatedContent = content.replace(
+        suggestion.original,
+        suggestion.improved
+      );
+      onContentUpdate(updatedContent);
+    } else if (suggestion.improved && !suggestion.original) {
+      // General improvement - append or use as reference
+      const improvedContent = `${content}\n\n${suggestion.improved}`;
+      onContentUpdate(improvedContent);
+    }
+  };
+
+  const applyAllSuggestions = () => {
+    if (!suggestions?.suggestions) return;
+
+    let updatedContent = content;
+    suggestions.suggestions.forEach((suggestion) => {
+      if (suggestion.original && suggestion.improved) {
+        updatedContent = updatedContent.replace(
+          suggestion.original,
+          suggestion.improved
+        );
+      }
+    });
+    onContentUpdate(updatedContent);
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 backdrop-blur-md bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-gray-900">
@@ -71,7 +98,7 @@ const AIWritingAssistant = ({
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              📝 Grammar & Style
+              📝 Grammar Check
             </button>
             <button
               onClick={() => setActiveTab("enhance")}
@@ -97,75 +124,101 @@ const AIWritingAssistant = ({
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-          {/* Action Buttons */}
-          <div className="flex space-x-3 mb-6">
+          {/* Action Button */}
+          <div className="mb-6 flex gap-3">
             <button
               onClick={() => analyzeContent(activeTab)}
               disabled={loading}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2"
+              className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2 justify-center"
             >
               {loading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
               ) : (
-                <span>✨</span>
+                <span>
+                  {activeTab === "grammar" && "📝"}
+                  {activeTab === "enhance" && "🚀"}
+                  {activeTab === "tone" && "🎯"}
+                </span>
               )}
               <span>
                 {loading
                   ? "Analyzing..."
-                  : activeTab === "grammar"
-                  ? "Check Grammar"
-                  : activeTab === "enhance"
-                  ? "Enhance Content"
-                  : "Adjust Tone"}
+                  : `Analyze ${
+                      activeTab === "grammar"
+                        ? "Grammar"
+                        : activeTab === "enhance"
+                        ? "Content"
+                        : "Tone"
+                    }`}
               </span>
             </button>
+
+            {suggestions?.suggestions?.length > 0 && (
+              <button
+                onClick={applyAllSuggestions}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 flex items-center space-x-2"
+              >
+                <span>✨</span>
+                <span>Apply All</span>
+              </button>
+            )}
           </div>
 
           {/* Results */}
           {suggestions && (
             <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">
-                {activeTab === "grammar" && "Grammar & Style Suggestions"}
-                {activeTab === "enhance" && "Content Enhancement"}
-                {activeTab === "tone" && "Tone Adjustments"}
-              </h4>
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold text-gray-900">
+                  {activeTab === "grammar" && "Grammar & Style Suggestions"}
+                  {activeTab === "enhance" && "Content Enhancement Suggestions"}
+                  {activeTab === "tone" && "Tone Adjustment Suggestions"}
+                </h4>
+                <span className="text-sm text-gray-500">
+                  {suggestions.suggestions?.length || 0} suggestions found
+                </span>
+              </div>
 
               {suggestions.suggestions?.map((suggestion, index) => (
                 <div
                   key={index}
-                  className="border border-gray-200 rounded-lg p-4 space-y-3"
+                  className="border border-gray-200 rounded-lg p-4 space-y-3 hover:border-blue-300 transition-colors bg-gray-50"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="text-sm text-gray-600 mb-2">
-                        {suggestion.type === "grammar" && "📝 Grammar Issue"}
-                        {suggestion.type === "style" && "✨ Style Improvement"}
+                      <div className="text-sm text-gray-600 mb-2 flex items-center">
+                        {suggestion.type === "grammar" && "📝 Grammar Fix"}
                         {suggestion.type === "enhancement" && "🚀 Enhancement"}
                         {suggestion.type === "tone" && "🎯 Tone Adjustment"}
+                        {suggestion.confidence && (
+                          <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                            {Math.round(suggestion.confidence * 100)}%
+                            confidence
+                          </span>
+                        )}
                       </div>
 
                       {suggestion.original && (
-                        <div className="mb-2">
+                        <div className="mb-3">
                           <span className="text-sm font-medium text-red-600">
                             Original:
                           </span>
-                          <div className="bg-red-50 p-2 rounded mt-1 text-sm">
+                          <div className="bg-red-50 border-l-4 border-red-400 p-3 rounded mt-1 text-sm">
                             {suggestion.original}
                           </div>
                         </div>
                       )}
 
-                      <div className="mb-2">
+                      <div className="mb-3">
                         <span className="text-sm font-medium text-green-600">
-                          Suggestion:
+                          {suggestion.original ? "Improved:" : "Suggestion:"}
                         </span>
-                        <div className="bg-green-50 p-2 rounded mt-1 text-sm">
+                        <div className="bg-green-50 border-l-4 border-green-400 p-3 rounded mt-1 text-sm">
                           {suggestion.improved}
                         </div>
                       </div>
 
                       {suggestion.reason && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 bg-gray-100 p-2 rounded">
                           <strong>Why:</strong> {suggestion.reason}
                         </div>
                       )}
@@ -173,59 +226,48 @@ const AIWritingAssistant = ({
 
                     <button
                       onClick={() => applySuggestion(suggestion)}
-                      className="ml-4 bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                      className="ml-4 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition-colors flex items-center space-x-1"
                     >
-                      Apply
+                      <span>✓</span>
+                      <span>Apply</span>
                     </button>
                   </div>
                 </div>
               ))}
 
-              {suggestions.overallScore && (
-                <div className="bg-blue-50 rounded-lg p-4 mt-6">
-                  <h5 className="font-semibold text-blue-900 mb-2">
-                    Content Analysis
-                  </h5>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <span className="text-blue-600">Readability:</span>
-                      <div className="font-semibold">
-                        {suggestions.overallScore.readability}/10
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-blue-600">Grammar:</span>
-                      <div className="font-semibold">
-                        {suggestions.overallScore.grammar}/10
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-blue-600">Engagement:</span>
-                      <div className="font-semibold">
-                        {suggestions.overallScore.engagement}/10
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-blue-600">Clarity:</span>
-                      <div className="font-semibold">
-                        {suggestions.overallScore.clarity}/10
-                      </div>
-                    </div>
+              {suggestions.suggestions?.length === 0 && (
+                <div className="text-center text-gray-500 py-8 bg-green-50 rounded-lg">
+                  <div className="text-4xl mb-2">🎉</div>
+                  <div className="font-medium">Great job!</div>
+                  <div>
+                    No improvements needed. Your content looks excellent!
                   </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* Word count and reading time */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>Word count: {content.split(" ").length}</span>
-              <span>
-                Reading time: ~{Math.ceil(content.split(" ").length / 200)} min
-              </span>
+          {!suggestions && !loading && (
+            <div className="text-center text-gray-500 py-12 bg-gray-50 rounded-lg">
+              <div className="text-4xl mb-4">
+                {activeTab === "grammar" && "📝"}
+                {activeTab === "enhance" && "🚀"}
+                {activeTab === "tone" && "🎯"}
+              </div>
+              <div className="font-medium mb-2">
+                Ready to improve your content?
+              </div>
+              <div>
+                Click the analyze button to get AI-powered suggestions for your{" "}
+                {activeTab === "grammar"
+                  ? "grammar and style"
+                  : activeTab === "enhance"
+                  ? "content quality"
+                  : "tone and voice"}
+                .
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
