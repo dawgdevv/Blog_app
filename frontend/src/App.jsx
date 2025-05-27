@@ -19,7 +19,14 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto"></div>
+          <p className="mt-6 text-gray-600 text-lg">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
@@ -33,7 +40,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-gray-50">
           <Navbar />
           <main className="flex-grow">
             <Routes>
@@ -67,7 +74,7 @@ function App() {
                 }
               />
 
-              {/* Fallback route */}
+              {/* Catch all route */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </main>
