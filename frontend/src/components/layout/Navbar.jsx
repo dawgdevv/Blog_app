@@ -12,22 +12,25 @@ const Navbar = () => {
   const { user, isAuthenticated } = useAuth();
 
   return (
-    <nav className="w-full bg-white border-b px-4 py-2 flex justify-between items-center">
-      <Link to="/" className="text-lg font-bold text-blue-600">
-        BlogSphere
+    <nav className="w-full bg-white shadow-sm border-b border-gray-100 px-4 py-3 flex justify-between items-center sticky top-0 z-50">
+      <Link
+        to="/"
+        className="text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
+      >
+        📜 BlogSphere
       </Link>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {isAuthenticated ? (
           <>
             <Link
               to="/streak"
-              className="text-white bg-blue-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
             >
               Streak 🔥
             </Link>
             <Link
               to="/blog/create"
-              className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 flex items-center gap-1"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -49,7 +52,7 @@ const Navbar = () => {
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu((v) => !v)}
-                className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-lg font-medium transition-colors duration-200 shadow-sm"
               >
                 {user?.name?.charAt(0).toUpperCase() || "U"}
               </button>
@@ -62,13 +65,13 @@ const Navbar = () => {
           <>
             <button
               onClick={() => setShowLoginModal(true)}
-              className="bg-blue-600 text-white px-3 py-1 rounded"
+              className="text-blue-600 hover:text-blue-700 px-4 py-2 rounded-lg transition-colors duration-200 font-medium border border-blue-600 hover:border-blue-700"
             >
               Login
             </button>
             <button
               onClick={() => setShowSignupModal(true)}
-              className="bg-blue-600 text-white px-3 py-1 rounded"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
             >
               Sign Up
             </button>
