@@ -55,6 +55,7 @@ export const getBlogs = async (req, res) => {
   }
 };
 
+// Fixed function name from getBlog to getBlogById
 export const getBlogById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -70,7 +71,6 @@ export const getBlogById = async (req, res) => {
   }
 };
 
-// Update other functions as needed to use populate for author information
 export const updateBlog = async (req, res) => {
   const { id } = req.params;
   const { title, content, coverImage } = req.body;
@@ -132,14 +132,134 @@ export const deleteBlog = async (req, res) => {
   }
 };
 
+// Fixed function name from getUserBlogs to getBlogsByUser
 export const getBlogsByUser = async (req, res) => {
+  // Handle both current user and specific user cases
   const userId = req.params.userId || req.user._id;
+
   try {
     const blogs = await Blog.find({ author: userId })
       .populate("author", "name")
       .sort({ createdAt: -1 });
 
     res.status(200).json(blogs);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const likeBlog = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  try {
+    const blog = await Blog.findById(id);
+
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    // Check if user already liked the blog
+    const alreadyLiked = blog.likes.some(
+      (like) => like.user.toString() === userId.toString()
+    );
+
+    if (alreadyLiked) {
+      // Remove like
+      blog.likes = blog.likes.filter(
+        (like) => like.user.toString() !== userId.toString()
+      );
+    } else {
+      // Remove dislike if exists
+      blog.dislikes = blog.dislikes.filter(
+        (dislike) => dislike.user.toString() !== userId.toString()
+      );
+      // Add like
+      blog.likes.push({ user: userId });
+    }
+
+    await blog.save();
+
+    res.status(200).json({
+      message: alreadyLiked ? "Like removed" : "Blog liked",
+      likesCount: blog.likes.length,
+      dislikesCount: blog.dislikes.length,
+      userLiked: !alreadyLiked,
+      userDisliked: false,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const dislikeBlog = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  try {
+    const blog = await Blog.findById(id);
+
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    // Check if user already disliked the blog
+    const alreadyDisliked = blog.dislikes.some(
+      (dislike) => dislike.user.toString() === userId.toString()
+    );
+
+    if (alreadyDisliked) {
+      // Remove dislike
+      blog.dislikes = blog.dislikes.filter(
+        (dislike) => dislike.user.toString() !== userId.toString()
+      );
+    } else {
+      // Remove like if exists
+      blog.likes = blog.likes.filter(
+        (like) => like.user.toString() !== userId.toString()
+      );
+      // Add dislike
+      blog.dislikes.push({ user: userId });
+    }
+
+    await blog.save();
+
+    res.status(200).json({
+      message: alreadyDisliked ? "Dislike removed" : "Blog disliked",
+      likesCount: blog.likes.length,
+      dislikesCount: blog.dislikes.length,
+      userLiked: false,
+      userDisliked: !alreadyDisliked,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const getBlogLikeStatus = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  try {
+    const blog = await Blog.findById(id);
+
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    const userLiked = blog.likes.some(
+      (like) => like.user.toString() === userId.toString()
+    );
+    const userDisliked = blog.dislikes.some(
+      (dislike) => dislike.user.toString() === userId.toString()
+    );
+
+    res.status(200).json({
+      likesCount: blog.likes.length,
+      dislikesCount: blog.dislikes.length,
+      userLiked,
+      userDisliked,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }

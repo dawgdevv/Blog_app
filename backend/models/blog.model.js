@@ -25,14 +25,39 @@ const blogSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    // Add the coverImage field
     coverImage: {
       type: String,
       trim: true,
     },
+    likes: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    dislikes: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   { timestamps: true }
-); // Also add timestamps for createdAt/updatedAt
+);
 
 const Blog = mongoose.model("Blog", blogSchema);
 export default Blog;

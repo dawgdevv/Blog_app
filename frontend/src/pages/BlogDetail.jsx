@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../hooks/useAuth";
 import Comments from "../components/common/Comments";
+import LikeDislike from "../components/common/likeDislike";
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -157,6 +158,9 @@ const BlogDetail = () => {
           )
         )}
       </div>
+
+      {/* Like/Dislike component */}
+      <LikeDislike blogId={blog._id} />
 
       {/* Comments section */}
       <Comments blogId={blog._id} />

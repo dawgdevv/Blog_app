@@ -221,6 +221,27 @@ The application follows a **client-server architecture**:
 - **Auth**: Required
 - **Response**: Array of blog objects authored by specified user
 
+#### Like blog post
+
+- **URL**: `/api/blogs/like/:id`
+- **Method**: `POST`
+- **Auth**: Required
+- **Response**: Like status with counts
+
+#### Dislike blog post
+
+- **URL**: `/api/blogs/dislike/:id`
+- **Method**: `POST`
+- **Auth**: Required
+- **Response**: Dislike status with counts
+
+#### Get blog like status
+
+- **URL**: `/api/blogs/like-status/:id`
+- **Method**: `GET`
+- **Auth**: Required
+- **Response**: Current like/dislike status and counts
+
 ### Comments
 
 #### Get comments for a blog
