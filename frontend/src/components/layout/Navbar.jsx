@@ -20,6 +20,12 @@ const Navbar = () => {
         {isAuthenticated ? (
           <>
             <Link
+              to="/streak"
+              className="text-white bg-blue-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+            >
+              Streak 🔥
+            </Link>
+            <Link
               to="/blog/create"
               className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 flex items-center gap-1"
             >
@@ -39,6 +45,7 @@ const Navbar = () => {
               </svg>
               Create Blog
             </Link>
+
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu((v) => !v)}

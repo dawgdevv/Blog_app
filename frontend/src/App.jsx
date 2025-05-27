@@ -12,6 +12,7 @@ import BlogDetail from "./pages/BlogDetail";
 import CreateBlog from "./pages/CreateBlog";
 import EditBlog from "./pages/EditBlog";
 import MyBlogs from "./pages/MyBlogs";
+import StreakDashboard from "./pages/StreakDashboard";
 import { useAuth } from "./hooks/useAuth";
 
 // Protected route component
@@ -70,6 +71,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <MyBlogs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/streak"
+                element={
+                  <ProtectedRoute>
+                    <StreakDashboard />
                   </ProtectedRoute>
                 }
               />

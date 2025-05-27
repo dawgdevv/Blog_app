@@ -1,4 +1,5 @@
 import Blog from "../models/blog.model.js";
+import { updateStreakOnBlog } from "./streak.controller.js";
 
 export const createBlog = async (req, res) => {
   const { title, content, coverImage } = req.body;
@@ -17,9 +18,14 @@ export const createBlog = async (req, res) => {
       "name"
     );
 
+    // Update user streak and experience
+    const wordCount = content.split(" ").length;
+    const streakUpdate = await updateStreakOnBlog(req.user._id, wordCount);
+
     res.status(201).json({
       message: "Blog created successfully",
       blog: populatedBlog,
+      streakUpdate: streakUpdate,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
