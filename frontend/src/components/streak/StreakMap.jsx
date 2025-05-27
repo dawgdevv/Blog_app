@@ -1,92 +1,20 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 const StreakMap = ({ streakMap, streakData }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [hoveredDate, setHoveredDate] = useState(null);
 
-  if (!streakMap) {
-    return (
-      <div className="bg-white rounded-2xl shadow-lg p-8">
-        <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
-          <div className="grid grid-cols-53 gap-1">
-            {Array.from({ length: 365 }).map((_, i) => (
-              <div key={i} className="w-3 h-3 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Debug: Log the streak map data
+  console.log("StreakMap data:", streakMap);
 
-  const getActivityColor = (level, blogsPosted) => {
-    if (blogsPosted === 0) return "bg-gray-100 border-gray-200";
-    if (level === 1) return "bg-green-200 border-green-300";
-    if (level === 2) return "bg-green-400 border-green-500";
-    if (level === 3) return "bg-green-600 border-green-700";
-    return "bg-green-800 border-green-900";
-  };
+  // Memoized calculations to avoid redundant processing
+  const { weeks, monthLabels } = useMemo(() => {
+    if (!streakMap?.streakMap?.length) {
+      return { weeks: [], monthLabels: [] };
+    }
 
-  const getActivityEmoji = (blogsPosted) => {
-    if (blogsPosted === 0) return "";
-    if (blogsPosted === 1) return "📝";
-    if (blogsPosted === 2) return "✍️";
-    if (blogsPosted >= 3) return "🔥";
-    return "📚";
-  };
-
-  const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const getWeeksArray = () => {
+    const days = streakMap.streakMap;
     const weeks = [];
-    const days = streakMap.streakMap || [];
-
-    if (!days.length) return weeks;
-
-    // Start from the first day in the data
-    const firstDate = new Date(days[0].date);
-    const firstDayOfWeek = firstDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-
-    let currentWeek = [];
-
-    // Fill the first week with empty cells if needed
-    for (let i = 0; i < firstDayOfWeek; i++) {
-      currentWeek.push(null);
-    }
-
-    // Add all the days
-    days.forEach((day) => {
-      currentWeek.push(day);
-
-      // If we've filled a week (7 days), start a new week
-      if (currentWeek.length === 7) {
-        weeks.push(currentWeek);
-        currentWeek = [];
-      }
-    });
-
-    // Handle the last partial week
-    if (currentWeek.length > 0) {
-      // Fill remaining slots with null
-      while (currentWeek.length < 7) {
-        currentWeek.push(null);
-      }
-      weeks.push(currentWeek);
-    }
-
-    return weeks;
-  };
-
-  const getMonthLabels = () => {
-    const weeks = getWeeksArray();
     const monthLabels = [];
     const months = [
       "Jan",
@@ -103,38 +31,95 @@ const StreakMap = ({ streakMap, streakData }) => {
       "Dec",
     ];
 
+    // Debug: Log some sample days to see the data structure
+    console.log("Sample days data:", days.slice(-10));
+
+    // Create weeks array
+    const firstDate = new Date(days[0].date);
+    const firstDayOfWeek = firstDate.getDay();
+    let currentWeek = new Array(firstDayOfWeek).fill(null);
+
+    days.forEach((day) => {
+      currentWeek.push(day);
+      if (currentWeek.length === 7) {
+        weeks.push(currentWeek);
+        currentWeek = [];
+      }
+    });
+
+    if (currentWeek.length > 0) {
+      while (currentWeek.length < 7) {
+        currentWeek.push(null);
+      }
+      weeks.push(currentWeek);
+    }
+
+    // Create month labels
     weeks.forEach((week, weekIndex) => {
       const firstDayOfWeek = week.find((day) => day !== null);
       if (firstDayOfWeek) {
         const date = new Date(firstDayOfWeek.date);
         const dayOfMonth = date.getDate();
-
-        // Show month label if it's the first week of the month or first few days
-        if (dayOfMonth <= 7) {
-          monthLabels.push({
-            weekIndex,
-            month: months[date.getMonth()],
-          });
-        } else {
-          monthLabels.push({
-            weekIndex,
-            month: "",
-          });
-        }
-      } else {
         monthLabels.push({
           weekIndex,
-          month: "",
+          month: dayOfMonth <= 7 ? months[date.getMonth()] : "",
         });
+      } else {
+        monthLabels.push({ weekIndex, month: "" });
       }
     });
 
-    return monthLabels;
+    return { weeks, monthLabels };
+  }, [streakMap]);
+
+  const getActivityColor = (level, blogsPosted) => {
+    if (blogsPosted === 0) return "bg-gray-100 border-gray-200";
+    const colors = [
+      "bg-gray-100 border-gray-200",
+      "bg-green-200 border-green-300",
+      "bg-green-400 border-green-500",
+      "bg-green-600 border-green-700",
+      "bg-green-800 border-green-900",
+    ];
+    return colors[Math.min(level, 4)] || colors[4];
   };
 
-  const weeks = getWeeksArray();
-  const monthLabels = getMonthLabels();
+  const getActivityEmoji = (blogsPosted) => {
+    if (blogsPosted === 0) return "";
+    if (blogsPosted === 1) return "📝";
+    if (blogsPosted === 2) return "✍️";
+    if (blogsPosted >= 3) return "🔥";
+    return "📚";
+  };
+
+  const formatDate = (dateStr) => {
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  if (!streakMap) {
+    return (
+      <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
+          <div className="grid grid-cols-53 gap-1">
+            {Array.from({ length: 365 }).map((_, i) => (
+              <div key={i} className="w-3 h-3 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const consistencyPercentage = Math.round(
+    (streakMap.activeDays / streakMap.totalDays) * 100
+  );
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8">
@@ -179,35 +164,46 @@ const StreakMap = ({ streakMap, streakData }) => {
           <div className="flex space-x-1">
             {weeks.map((week, weekIndex) => (
               <div key={weekIndex} className="flex flex-col space-y-1">
-                {week.map((day, dayIndex) => (
-                  <div
-                    key={`${weekIndex}-${dayIndex}`}
-                    className={`w-3 h-3 rounded-sm border transition-all duration-200 ${
-                      day
-                        ? `cursor-pointer hover:scale-110 ${getActivityColor(
-                            day.level,
-                            day.blogsPosted
-                          )}`
-                        : "bg-transparent border-transparent"
-                    } ${
-                      hoveredDate === day?.date ? "ring-2 ring-blue-400" : ""
-                    }`}
-                    onMouseEnter={() => day && setHoveredDate(day.date)}
-                    onMouseLeave={() => setHoveredDate(null)}
-                    onClick={() => day && setSelectedDate(day)}
-                    title={
-                      day
-                        ? `${formatDate(day.date)}: ${day.blogsPosted} posts`
-                        : ""
-                    }
-                  >
-                    {day && day.blogsPosted > 0 && (
-                      <div className="text-[8px] leading-none text-center overflow-hidden">
-                        {getActivityEmoji(day.blogsPosted)}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                {week.map((day, dayIndex) => {
+                  // Debug log for days with posts
+                  if (day && day.blogsPosted > 0) {
+                    console.log(
+                      `Day ${day.date}: ${day.blogsPosted} posts, level: ${day.level}`
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={`${weekIndex}-${dayIndex}`}
+                      className={`w-3 h-3 rounded-sm border transition-all duration-200 ${
+                        day
+                          ? `cursor-pointer hover:scale-110 ${getActivityColor(
+                              day.level,
+                              day.blogsPosted
+                            )}`
+                          : "bg-transparent border-transparent"
+                      } ${
+                        hoveredDate === day?.date ? "ring-2 ring-blue-400" : ""
+                      }`}
+                      onMouseEnter={() => day && setHoveredDate(day.date)}
+                      onMouseLeave={() => setHoveredDate(null)}
+                      onClick={() => day && setSelectedDate(day)}
+                      title={
+                        day
+                          ? `${formatDate(day.date)}: ${day.blogsPosted} post${
+                              day.blogsPosted !== 1 ? "s" : ""
+                            }`
+                          : ""
+                      }
+                    >
+                      {day && day.blogsPosted > 0 && (
+                        <div className="text-[8px] leading-none text-center overflow-hidden">
+                          {getActivityEmoji(day.blogsPosted)}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -219,11 +215,15 @@ const StreakMap = ({ streakMap, streakData }) => {
         <div className="flex items-center space-x-2">
           <span>Less</span>
           <div className="flex space-x-1">
-            <div className="w-3 h-3 bg-gray-100 border border-gray-200 rounded-sm"></div>
-            <div className="w-3 h-3 bg-green-200 border border-green-300 rounded-sm"></div>
-            <div className="w-3 h-3 bg-green-400 border border-green-500 rounded-sm"></div>
-            <div className="w-3 h-3 bg-green-600 border border-green-700 rounded-sm"></div>
-            <div className="w-3 h-3 bg-green-800 border border-green-900 rounded-sm"></div>
+            {[0, 1, 2, 3, 4].map((level) => (
+              <div
+                key={level}
+                className={`w-3 h-3 rounded-sm ${getActivityColor(
+                  level,
+                  level
+                )}`}
+              ></div>
+            ))}
           </div>
           <span>More</span>
         </div>
@@ -298,7 +298,7 @@ const StreakMap = ({ streakMap, streakData }) => {
         </div>
         <div className="text-center p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl">
           <div className="text-2xl font-bold text-orange-600">
-            {Math.round((streakMap.activeDays / streakMap.totalDays) * 100)}%
+            {consistencyPercentage}%
           </div>
           <div className="text-sm text-gray-600">Consistency</div>
         </div>

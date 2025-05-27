@@ -193,30 +193,44 @@ userSchema.methods.updateStreak = function () {
 };
 
 userSchema.methods.updateDailyActivity = function (date) {
-  const dateOnly = new Date(date);
-  dateOnly.setHours(0, 0, 0, 0);
+  // Ensure we're working with a Date object
+  const targetDate = new Date(date);
+  // Normalize to start of day in user's timezone
+  targetDate.setHours(0, 0, 0, 0);
 
-  const existingDay = this.streakData.dailyActivity.find(
-    (day) => day.date.getTime() === dateOnly.getTime()
-  );
+  // Find existing activity for this date with proper comparison
+  const existingDayIndex = this.streakData.dailyActivity.findIndex((day) => {
+    const dayDate = new Date(day.date);
+    dayDate.setHours(0, 0, 0, 0);
+    return dayDate.getTime() === targetDate.getTime();
+  });
 
-  if (existingDay) {
-    existingDay.blogsPosted += 1;
-    existingDay.streakDay = this.streakData.currentStreak;
+  if (existingDayIndex !== -1) {
+    // Update existing day's count and streak
+    this.streakData.dailyActivity[existingDayIndex] = {
+      ...this.streakData.dailyActivity[existingDayIndex],
+      blogsPosted:
+        this.streakData.dailyActivity[existingDayIndex].blogsPosted + 1,
+      streakDay: this.streakData.currentStreak,
+      date: targetDate, // Ensure date is normalized
+    };
   } else {
+    // Add new day
     this.streakData.dailyActivity.push({
-      date: dateOnly,
+      date: targetDate,
       blogsPosted: 1,
       streakDay: this.streakData.currentStreak,
     });
   }
 
-  // Keep only last 365 days
+  // Keep only last 365 days and sort by date
   const oneYearAgo = new Date();
-  oneYearAgo.setDate(oneYearAgo.getDate() - 365);
-  this.streakData.dailyActivity = this.streakData.dailyActivity.filter(
-    (day) => day.date >= oneYearAgo
-  );
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  oneYearAgo.setHours(0, 0, 0, 0);
+
+  this.streakData.dailyActivity = this.streakData.dailyActivity
+    .filter((day) => new Date(day.date) >= oneYearAgo)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 };
 
 userSchema.methods.checkLevelUp = function () {
