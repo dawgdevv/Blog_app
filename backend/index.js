@@ -6,6 +6,7 @@ import userRoutes from "./routes/user.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
 import commentRoutes from "./routes/comment.routes.js";
 import streakRoutes from "./routes/streak.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 const app = express();
 dotenv.config();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +27,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/streak", streakRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.get("/", (req, res) => {
   res.send("running the backend sevices!");

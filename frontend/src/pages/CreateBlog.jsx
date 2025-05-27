@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../hooks/useAuth";
+import AIWritingAssistant from "../components/ai/AIWritingAssistant";
 
 const CreateBlog = () => {
   const [title, setTitle] = useState("");
@@ -9,6 +10,7 @@ const CreateBlog = () => {
   const [coverImage, setCoverImage] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
@@ -55,7 +57,16 @@ const CreateBlog = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Create New Blog Post</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Create New Blog Post</h1>
+        <button
+          onClick={() => setShowAIAssistant(true)}
+          className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700 flex items-center space-x-2 transition-all"
+        >
+          <span>✨</span>
+          <span>AI Assistant</span>
+        </button>
+      </div>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -114,12 +125,22 @@ const CreateBlog = () => {
         </div>
 
         <div className="mb-4">
-          <label
-            htmlFor="content"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            Content
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label
+              htmlFor="content"
+              className="block text-gray-700 font-medium"
+            >
+              Content
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowAIAssistant(true)}
+              className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full hover:bg-purple-200 flex items-center space-x-1"
+            >
+              <span>✨</span>
+              <span>Get AI Help</span>
+            </button>
+          </div>
           <textarea
             id="content"
             value={content}
@@ -128,6 +149,15 @@ const CreateBlog = () => {
             placeholder="Write your blog post content here..."
             required
           ></textarea>
+          <div className="text-sm text-gray-500 mt-1">
+            Word count:{" "}
+            {content.split(" ").filter((word) => word.length > 0).length} |
+            Reading time: ~
+            {Math.ceil(
+              content.split(" ").filter((word) => word.length > 0).length / 200
+            )}{" "}
+            min
+          </div>
         </div>
 
         <div className="flex gap-3">
@@ -147,6 +177,13 @@ const CreateBlog = () => {
           </button>
         </div>
       </form>
+
+      <AIWritingAssistant
+        content={content}
+        onContentUpdate={setContent}
+        isVisible={showAIAssistant}
+        onClose={() => setShowAIAssistant(false)}
+      />
     </div>
   );
 };
