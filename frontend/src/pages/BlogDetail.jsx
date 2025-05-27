@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../hooks/useAuth";
+import Comments from "../components/common/Comments";
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -156,7 +157,11 @@ const BlogDetail = () => {
           )
         )}
       </div>
+
+      {/* Comments section */}
+      <Comments blogId={blog._id} />
     </div>
   );
 };
+
 export default BlogDetail;

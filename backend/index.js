@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/user.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
+import commentRoutes from "./routes/comment.routes.js"; // Add this line
 const app = express();
 dotenv.config();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/users", userRoutes);
 app.use("/api/blogs", blogRoutes);
+app.use("/api/comments", commentRoutes); // Add this line
+
 app.get("/", (req, res) => {
   res.send("running the backend sevices!");
 });

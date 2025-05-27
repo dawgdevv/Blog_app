@@ -221,6 +221,49 @@ The application follows a **client-server architecture**:
 - **Auth**: Required
 - **Response**: Array of blog objects authored by specified user
 
+### Comments
+
+#### Get comments for a blog
+
+- **URL**: `/api/comments/blog/:blogId`
+- **Method**: `GET`
+- **Response**: Array of comment objects with replies
+
+#### Create comment
+
+- **URL**: `/api/comments/create`
+- **Method**: `POST`
+- **Auth**: Required
+- **Body**:
+  ```json
+  {
+    "content": "string",
+    "blogId": "string",
+    "parentCommentId": "string (optional)"
+  }
+  ```
+- **Response**: Created comment object
+
+#### Update comment
+
+- **URL**: `/api/comments/update/:id`
+- **Method**: `PUT`
+- **Auth**: Required (comment author only)
+- **Body**:
+  ```json
+  {
+    "content": "string"
+  }
+  ```
+- **Response**: Updated comment object
+
+#### Delete comment
+
+- **URL**: `/api/comments/delete/:id`
+- **Method**: `DELETE`
+- **Auth**: Required (comment author only)
+- **Response**: Success message
+
 ## Contributing
 
 1. Fork the repository

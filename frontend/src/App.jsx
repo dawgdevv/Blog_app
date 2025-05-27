@@ -11,7 +11,7 @@ import BlogList from "./pages/BlogList";
 import BlogDetail from "./pages/BlogDetail";
 import CreateBlog from "./pages/CreateBlog";
 import EditBlog from "./pages/EditBlog";
-import MyBlogs from "./pages/MyBlogs"; // Import new component
+import MyBlogs from "./pages/MyBlogs";
 import { useAuth } from "./hooks/useAuth";
 
 // Protected route component
