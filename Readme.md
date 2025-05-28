@@ -69,7 +69,7 @@ The application follows a **client-server architecture**:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/dawgdevv/Blog_application
+   git clone https://github.com/dawgdevv/Blog_app.git
    cd Blog_application
    ```
 
@@ -88,7 +88,7 @@ The application follows a **client-server architecture**:
 3. Environment Configuration:
    Create a `.env` file in the root directory with the following variables:
 
-   ```
+   ```env
    PORT=5000
    MONGODB_URI=mongodb://localhost:27017/blog_app
    JWT_SECRET=your_jwt_secret_key
@@ -102,8 +102,8 @@ The application follows a **client-server architecture**:
    ```
 
 5. The application will be running at:
-   - Backend: http://localhost:5000
-   - Frontend: http://localhost:5173
+   - Backend: <http://localhost:5000>
+   - Frontend: <http://localhost:5173>
 
 ## API Endpoints
 
@@ -114,6 +114,7 @@ The application follows a **client-server architecture**:
 - **URL**: `/api/users/register`
 - **Method**: `POST`
 - **Body**:
+
   ```json
   {
     "name": "string",
@@ -121,6 +122,7 @@ The application follows a **client-server architecture**:
     "password": "string"
   }
   ```
+
 - **Response**: JWT token with success message
 
 #### Login
@@ -128,12 +130,14 @@ The application follows a **client-server architecture**:
 - **URL**: `/api/users/login`
 - **Method**: `POST`
 - **Body**:
+
   ```json
   {
     "email": "string",
     "password": "string"
   }
   ```
+
 - **Response**: JWT token with success message
 
 ### User Profile
@@ -155,6 +159,7 @@ The application follows a **client-server architecture**:
   - `page`: Page number (default: 1)
   - `limit`: Posts per page (default: 6)
 - **Response**:
+
   ```json
   {
     "blogs": [Array of blog objects],
@@ -176,6 +181,7 @@ The application follows a **client-server architecture**:
 - **Method**: `POST`
 - **Auth**: Required
 - **Body**:
+
   ```json
   {
     "title": "string",
@@ -183,6 +189,7 @@ The application follows a **client-server architecture**:
     "coverImage": "string"
   }
   ```
+
 - **Response**: Created blog object
 
 #### Update blog post
@@ -191,6 +198,7 @@ The application follows a **client-server architecture**:
 - **Method**: `PUT`
 - **Auth**: Required (post owner only)
 - **Body**:
+
   ```json
   {
     "title": "string",
@@ -198,6 +206,7 @@ The application follows a **client-server architecture**:
     "coverImage": "string"
   }
   ```
+
 - **Response**: Updated blog object
 
 #### Delete blog post
@@ -256,6 +265,7 @@ The application follows a **client-server architecture**:
 - **Method**: `POST`
 - **Auth**: Required
 - **Body**:
+
   ```json
   {
     "content": "string",
@@ -263,6 +273,7 @@ The application follows a **client-server architecture**:
     "parentCommentId": "string (optional)"
   }
   ```
+
 - **Response**: Created comment object
 
 #### Update comment
@@ -271,11 +282,13 @@ The application follows a **client-server architecture**:
 - **Method**: `PUT`
 - **Auth**: Required (comment author only)
 - **Body**:
+
   ```json
   {
     "content": "string"
   }
   ```
+
 - **Response**: Updated comment object
 
 #### Delete comment
@@ -284,6 +297,63 @@ The application follows a **client-server architecture**:
 - **Method**: `DELETE`
 - **Auth**: Required (comment author only)
 - **Response**: Success message
+
+## Special Features
+
+### AI Writing Assistant ✨
+
+- Grammar checking and corrections
+- Content enhancement suggestions
+- Tone adjustment for better engagement
+- Real-time writing feedback using Hugging Face AI API
+- Three analysis modes:
+  - Grammar & Style
+  - Content Enhancement
+  - Tone Adjustment
+- Confidence scoring for suggestions
+- Batch apply improvements
+
+### Gamification System 🎮
+
+- **Streak System**
+
+  - Daily writing streaks
+  - Streak freezes (3 per user)
+  - Weekly challenges
+  - Activity heatmap
+  - Consistency tracking
+
+- **Level System**
+
+  - Experience points (XP) for activities
+  - Level progression
+  - Milestone rewards
+  - XP bonuses for consistency
+
+- **Badges**
+  - First Post 🎉
+  - Week Warrior 🔥 (7-day streak)
+  - Month Master 👑 (30-day streak)
+  - Century Champion 💎 (100-day streak)
+  - Rising Star ⭐ (Level 5)
+  - Blog Veteran 🎖️ (Level 10)
+
+### Engagement Features
+
+- Like/Dislike system
+- Nested comments
+- Reading time estimates
+- Post reaction statistics
+- Author profiles
+
+## Environment Variables
+
+```env
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+HUGGINGFACE_API_KEY=your_huggingface_api_key
+```
 
 ## Contributing
 
