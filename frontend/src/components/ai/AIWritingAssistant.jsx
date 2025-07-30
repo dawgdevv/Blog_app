@@ -29,7 +29,7 @@ const AIWritingAssistant = ({
         },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+        },
       );
       setSuggestions(response.data);
     } catch (error) {
@@ -45,7 +45,7 @@ const AIWritingAssistant = ({
       // Replace specific text
       const updatedContent = content.replace(
         suggestion.original,
-        suggestion.improved
+        suggestion.improved,
       );
       onContentUpdate(updatedContent);
     } else if (suggestion.improved && !suggestion.original) {
@@ -63,7 +63,7 @@ const AIWritingAssistant = ({
       if (suggestion.original && suggestion.improved) {
         updatedContent = updatedContent.replace(
           suggestion.original,
-          suggestion.improved
+          suggestion.improved,
         );
       }
     });
@@ -118,7 +118,7 @@ const AIWritingAssistant = ({
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              🎯 Tone Adjustment
+              🎯 Tone Adjustment's
             </button>
           </div>
         </div>
@@ -147,8 +147,8 @@ const AIWritingAssistant = ({
                       activeTab === "grammar"
                         ? "Grammar"
                         : activeTab === "enhance"
-                        ? "Content"
-                        : "Tone"
+                          ? "Content"
+                          : "Tone"
                     }`}
               </span>
             </button>
@@ -262,8 +262,8 @@ const AIWritingAssistant = ({
                 {activeTab === "grammar"
                   ? "grammar and style"
                   : activeTab === "enhance"
-                  ? "content quality"
-                  : "tone and voice"}
+                    ? "content quality"
+                    : "tone and voice"}
                 .
               </div>
             </div>
